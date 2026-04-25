@@ -42,7 +42,7 @@ function UserSection({
           {/* ===================== */}
           <button
             onClick={onLogout}
-            className="w-full py-2 mt-1 font-semibold text-white transition bg-red-600 rounded-md  hover:bg-red-700"
+            className="w-full py-2 mt-1 font-semibold text-white transition bg-yellow-500 rounded-md hover:bg-blue-600"
           >
             Logout
           </button>
@@ -54,7 +54,7 @@ function UserSection({
           {/* ===================== */}
           <button
             onClick={onLogin}
-            className="w-full py-2 font-semibold text-white transition bg-red-600 rounded-md  hover:bg-red-700"
+            className="w-full py-2 font-semibold text-white transition bg-yellow-500 rounded-md hover:bg-blue-600"
           >
             Login
           </button>

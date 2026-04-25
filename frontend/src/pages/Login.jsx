@@ -35,7 +35,7 @@ function Login() {
     <div className="flex items-center justify-center min-h-screen text-white">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm p-6 border  bg-white/5 backdrop-blur-xl border-white/10 rounded-xl"
+        className="w-full max-w-sm p-6 border bg-white/5 backdrop-blur-xl border-white/10 rounded-xl"
       >
         <h2 className="mb-4 text-xl font-bold">Login</h2>
 
@@ -69,7 +69,7 @@ function Login() {
         {/* BUTTON */}
         <button
           type="submit"
-          className="w-full py-2 rounded  bg-gradient-to-br from-red-600 to-red-500"
+          className="w-full py-2 bg-yellow-500 rounded rounded-md bg-gradient-to-br hover:bg-blue-600"
         >
           Login
         </button>
@@ -77,7 +77,7 @@ function Login() {
         {/* LINK REGISTER */}
         <p className="mt-3 text-sm text-center">
           Belum punya akun?{" "}
-          <Link to="/register" className="text-red-400">
+          <Link to="/register" className="text-yellow-400">
             Register
           </Link>
         </p>

@@ -6,32 +6,40 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * RUN MIGRATION
-     */
     public function up(): void
     {
         Schema::create('movies', function (Blueprint $table) {
             $table->id();
 
-            // 🎬 BASIC MOVIE DATA
+            // Basic Info
             $table->string('title');
             $table->text('description');
+
+            // Media
             $table->string('poster_url');
+            $table->string('backdrop_url')->nullable();
 
-            // ⭐ RATING (0 - 10 / 0 - 5 terserah frontend)
-            $table->float('rating')->default(0);
+            //  Rating (0 - 10)
+            $table->decimal('rating', 3, 1)->default(0);
 
-            // 🏷 CATEGORY / GENRE
-            $table->string('category');
+            // 🎭 Genre (JSON support for multiple categories)
+            $table->json('categories');
+
+            // 📅 Optional Release Date
+            $table->year('release_year')->nullable();
+
+            // 📊 Engagements (for trending system)
+            $table->integer('views')->default(0);
+            $table->boolean('is_trending')->default(false);
 
             $table->timestamps();
+
+            // ⚡ INDEX (important for filtering)
+            $table->index('rating');
+            $table->index('is_trending');
         });
     }
 
-    /**
-     * ROLLBACK MIGRATION
-     */
     public function down(): void
     {
         Schema::dropIfExists('movies');

@@ -5,14 +5,12 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class AdminMiddleware
+class RoleMiddleware
 {
-    /**
-     * Handle request untuk memastikan hanya admin
-     */
-    public function handle(Request $request, Closure $next)
+    // Middleware untuk cek role user (admin, user)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        // 🔐 pastikan user login (dari Sanctum)
+        // Pastikan user login
         $user = $request->user();
 
         if (!$user) {
@@ -22,11 +20,19 @@ class AdminMiddleware
             ], 401);
         }
 
-        // 👑 cek role admin
-        if ($user->role !== 'admin') {
+        // Check Akun Aktif
+        if (!$user->is_active) {
             return response()->json([
                 'success' => false,
-                'message' => 'Forbidden: Admin only access'
+                'message' => 'Account is disabled'
+            ], 403);
+        }
+
+        // Check Role
+        if (!in_array($user->role, $roles)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden: insufficient permission'
             ], 403);
         }
 

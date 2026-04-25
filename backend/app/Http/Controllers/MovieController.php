@@ -7,51 +7,92 @@ use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
-    // =========================
-    // 🎬 LIST MOVIES (PAGINATION)
-    // =========================
-    public function index()
+    // LIST + SEARCH + FILTER + PAGINATION
+    public function index(Request $request)
     {
+        $query = Movie::query();
+
+        // Search By Title
+        if ($request->search) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter By Category (JSON)
+        if ($request->category) {
+            $query->whereJsonContains('categories', $request->category);
+        }
+
+        // Popular Movies
+        if ($request->popular) {
+            $query->where('rating', '>=', 8);
+        }
+
+        // Sort By Rating
+        if ($request->sort === 'rating') {
+            $query->orderBy('rating', 'desc');
+        } else {
+            $query->latest();
+        }
+
         return response()->json([
             'success' => true,
-            'data' => Movie::paginate(10)
+            'data' => $query->paginate(10)
         ]);
     }
 
-    // =========================
-    // 🎬 CREATE MOVIE (ADMIN ONLY)
-    // =========================
+    // Create Movie
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string',
             'description' => 'required|string',
-            'poster_url' => 'required|string',
+            'poster_url' => 'nullable|string',
             'rating' => 'required|numeric',
-            'category' => 'required|string'
+            'categories' => 'required',
         ]);
 
-        $movie = Movie::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'poster_url' => $request->poster_url,
-            'rating' => $request->rating,
-            'category' => $request->category,
-        ]);
+        $data = $request->all();
+
+        // Upload Poster (optional)
+        if ($request->hasFile('poster')) {
+            $path = $request->file('poster')->store('movies', 'public');
+            $data['poster_url'] = asset('storage/' . $path);
+        }
+
+        // Ensure JSON format
+        if (isset($data['categories']) && is_array($data['categories'])) {
+            $data['categories'] = json_encode($data['categories']);
+        }
+
+        $movie = Movie::create($data);
 
         return response()->json([
             'success' => true,
-            'message' => 'Movie created successfully',
+            'message' => 'Movie created',
             'data' => $movie
         ], 201);
     }
 
-    // =========================
-    // 🎬 SINGLE MOVIE DETAIL
-    // =========================
+    // Detail Movie + Reactions Count
     public function show($id)
     {
-        $movie = Movie::findOrFail($id);
+        $movie = Movie::withCount([
+            'watchlists as watchlist_count',
+            'reactions as love_count' => function ($q) {
+                $q->where('type', 'love');
+            },
+            'reactions as hate_count' => function ($q) {
+                $q->where('type', 'hate');
+            }
+        ])->find($id);
+
+        if (!$movie) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Movie not found',
+                'available_ids' => Movie::pluck('id')
+            ], 404);
+        }
 
         return response()->json([
             'success' => true,
@@ -59,9 +100,7 @@ class MovieController extends Controller
         ]);
     }
 
-    // =========================
-    // 🎬 UPDATE MOVIE
-    // =========================
+    // Update Movie (ADMIN)
     public function update(Request $request, $id)
     {
         $movie = Movie::findOrFail($id);
@@ -71,35 +110,48 @@ class MovieController extends Controller
             'description' => 'sometimes|string',
             'poster_url' => 'sometimes|string',
             'rating' => 'sometimes|numeric',
-            'category' => 'sometimes|string'
+            'categories' => 'sometimes',
         ]);
 
-        $movie->update([
-            'title' => $request->title ?? $movie->title,
-            'description' => $request->description ?? $movie->description,
-            'poster_url' => $request->poster_url ?? $movie->poster_url,
-            'rating' => $request->rating ?? $movie->rating,
-            'category' => $request->category ?? $movie->category,
-        ]);
+        $data = $request->all();
+
+        // Upload Poster (optional)
+        if ($request->hasFile('poster')) {
+            $path = $request->file('poster')->store('movies', 'public');
+            $data['poster_url'] = asset('storage/' . $path);
+        }
+
+        // ensure JSON format
+        if (isset($data['categories']) && is_array($data['categories'])) {
+            $data['categories'] = json_encode($data['categories']);
+        }
+
+        $movie->update($data);
 
         return response()->json([
             'success' => true,
-            'message' => 'Movie updated successfully',
+            'message' => 'Movie updated',
             'data' => $movie
         ]);
     }
 
-    // =========================
-    // 🎬 DELETE MOVIE
-    // =========================
+    // Delete Movie (ADMIN)
     public function destroy($id)
     {
-        $movie = Movie::findOrFail($id);
+        $movie = Movie::find($id);
+
+        if (!$movie) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Movie not found'
+            ], 404);
+        }
+
         $movie->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Movie deleted successfully'
+            'message' => 'Movie deleted'
         ]);
     }
 }

@@ -4,37 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    // =========================
-    // 👑 ADMIN: LIST USERS
-    // =========================
-    public function index()
+    // Admin: List Users with Search
+    public function index(Request $request)
     {
+        $query = User::query();
+
+        // 🔍 Search
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+        }
+
         return response()->json([
             'success' => true,
-            'data' => User::paginate(10)
+            'data' => $query->latest()->paginate(10)
         ]);
     }
 
-    // =========================
-    // 👤 ADMIN: SINGLE USER
-    // =========================
+    // Admin: Show User Detail
     public function show($id)
     {
-        $user = User::findOrFail($id);
-
         return response()->json([
             'success' => true,
-            'data' => $user
+            'data' => User::findOrFail($id)
         ]);
     }
 
-    // =========================
-    // 👑 ADMIN: UPDATE USER (SAFE)
-    // =========================
+    // Admin: Update User (including role & status)
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -42,49 +41,84 @@ class UserController extends Controller
         $request->validate([
             'name' => 'sometimes|string',
             'email' => 'sometimes|email|unique:users,email,' . $id,
-            'password' => 'sometimes|min:6'
+            'password' => 'sometimes|min:6',
+            'role' => 'sometimes|in:user,admin',
+            'is_active' => 'sometimes|boolean'
         ]);
 
-        $data = [];
+        $data = $request->only([
+            'name',
+            'email',
+            'role',
+            'is_active'
+        ]);
 
-        if ($request->name) {
-            $data['name'] = $request->name;
-        }
-
-        if ($request->email) {
-            $data['email'] = $request->email;
-        }
-
+        // ⚠️ JANGAN HASH kalau pakai mutator di model
         if ($request->password) {
-            $data['password'] = Hash::make($request->password);
+            $data['password'] = $request->password;
         }
 
         $user->update($data);
 
         return response()->json([
             'success' => true,
-            'message' => 'User updated successfully',
+            'message' => 'User updated',
             'data' => $user
         ]);
     }
 
-    // =========================
-    // 👑 ADMIN: DELETE USER
-    // =========================
+    // Admin: Suspend User
+    public function suspend($id)
+    {
+        $user = User::findOrFail($id);
+
+        $user->update([
+            'is_active' => false
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User suspended'
+        ]);
+    }
+
+    // Admin: Activate User
+    public function activate($id)
+    {
+        $user = User::findOrFail($id);
+
+        $user->update([
+            'is_active' => true
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User activated'
+        ]);
+    }
+
+    // Admin: Delete User (Except Self)
     public function destroy($id)
     {
         $user = User::findOrFail($id);
+
+        // ❗Jangan biarkan admin hapus dirinya sendiri
+        if (auth()->id() == $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete yourself'
+            ], 400);
+        }
+
         $user->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'User deleted successfully'
+            'message' => 'User deleted'
         ]);
     }
 
-    // =========================
-    // 👤 USER: PROFILE
-    // =========================
+    // User: Get Own Profile
     public function me(Request $request)
     {
         return response()->json([
@@ -93,9 +127,7 @@ class UserController extends Controller
         ]);
     }
 
-    // =========================
-    // 👤 USER: UPDATE SELF
-    // =========================
+    // User: Update Own Profile (name, email)
     public function updateSelf(Request $request)
     {
         $user = $request->user();
@@ -112,26 +144,22 @@ class UserController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Profile updated successfully',
+            'message' => 'Profile updated',
             'data' => $user
         ]);
     }
 
-    // =========================
-    // 👤 USER: DELETE SELF (SAFE + TOKEN CLEANUP)
-    // =========================
+    // User: Delete Own Account
     public function deleteSelf(Request $request)
     {
         $user = $request->user();
 
-        // 🔐 hapus semua token Sanctum
-        $user->tokens()->delete();
-
+        $user->tokens()->delete(); // Revoke token
         $user->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Account deleted successfully'
+            'message' => 'Account deleted'
         ]);
     }
 }

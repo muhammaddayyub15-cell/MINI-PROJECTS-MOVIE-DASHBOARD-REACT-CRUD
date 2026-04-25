@@ -6,9 +6,7 @@ function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  // =========================
-  // 📝 FORM STATE
-  // =========================
+    // FORM STATE
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -17,16 +15,14 @@ function Register() {
 
   const [error, setError] = useState("");
 
-  // =========================
-  // 🚀 HANDLE REGISTER
-  // =========================
+    // HANDLE REGISTER
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const res = await register(form);
 
     if (res.success) {
-      navigate("/login"); // 🔥 redirect ke login
+      navigate("/login"); // redirect ke login
     } else {
       setError(res.message || "Register gagal");
     }
@@ -78,7 +74,7 @@ function Register() {
         {/* BUTTON */}
         <button
           type="submit"
-          className="w-full py-2 rounded bg-gradient-to-br from-red-600 to-red-500"
+          className="w-full py-2 bg-yellow-500 rounded rounded-md bg-gradient-to-br hover:bg-blue-600"
         >
           Register
         </button>
@@ -86,7 +82,7 @@ function Register() {
         {/* LINK LOGIN */}
         <p className="mt-3 text-sm text-center">
           Sudah punya akun?{" "}
-          <Link to="/login" className="text-red-400">
+          <Link to="/login" className="text-yellow-400">
             Login
           </Link>
         </p>

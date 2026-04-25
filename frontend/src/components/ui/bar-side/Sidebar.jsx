@@ -10,8 +10,10 @@ const menu = [
   { label: "Top Rated" },
   { label: "Upcoming" },
   { label: "Genres" },
-  { label: "My List" },
-  { label: "Watch List" },
+  { label: "Watchlist" },
+  { label: "Community Talks" },
+  { label: "Profile" },
+  { label: "Admin Dashboard", adminOnly: true },
 ];
 
 function Sidebar() {
@@ -35,7 +37,7 @@ function Sidebar() {
     <div className="w-64 bg-[#111] text-white h-full flex flex-col shrink-0">
 
       {/* LOGO */}
-      <h2 className="p-5 m-0">🎬 Indoflix</h2>
+      <h2 className="p-5 m-0">🎬INDOFLIX</h2>
 
       {/* MENU */}
       <div className="flex-1">

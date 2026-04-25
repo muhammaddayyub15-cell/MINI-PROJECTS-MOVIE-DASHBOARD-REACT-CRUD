@@ -7,7 +7,7 @@ function MainLayout() {
   const [search, setSearch] = useState("");
 
   return (
-    <div className="flex min-h-screen w-full bg-gradient-to-br from-[#1a0000] via-[#3b0000] to-[#7a0000]">
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-[#0369f8] via-[#0d0c0c] to-[#f4c50d]">
       
       {/* SIDEBAR */}
       <div className="w-64 shrink-0">
@@ -22,7 +22,7 @@ function MainLayout() {
 
         {/* CONTENT */}
         <div className="p-5">
-          {/* 🔥 kirim search ke semua page */}
+          {/* kirim search ke semua page */}
           <Outlet context={{ search }} />
         </div>
 

@@ -1,17 +1,14 @@
 import MovieCard from "./MovieCard";
 
 function MovieList({ movies = [], search = "" }) {
-  const filtered = movies.filter((movie) =>
-    movie.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = movies
+    .filter((movie) => movie?.title) // 🔥 safety guard
+    .filter((movie) =>
+      movie.title.toLowerCase().includes(search.toLowerCase())
+    );
 
   return (
-    <div
-      className="
-        grid gap-5
-        grid-cols-[repeat(auto-fill,minmax(200px,1fr))]
-      "
-    >
+    <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(200px,1fr))] items-start">
       {filtered.map((movie) => (
         <MovieCard key={movie.id} {...movie} />
       ))}

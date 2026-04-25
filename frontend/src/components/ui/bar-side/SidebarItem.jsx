@@ -8,8 +8,8 @@ function SidebarItem({ item, active = false, onClick }) {
         border-l-4
         ${
           active
-            ? "bg-[#222] text-white border-red-600"
-            : "text-gray-400 border-transparent hover:bg-[#1a1a1a] hover:text-white"
+            ? "bg-[#222] text-white border-yellow-600"
+            : "text-gray-400 border-transparent hover:bg-[#e8c110] hover:text-white"
         }
       `}
     >

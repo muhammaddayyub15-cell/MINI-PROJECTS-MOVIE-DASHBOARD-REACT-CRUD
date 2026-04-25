@@ -1,15 +1,11 @@
 import { createContext, useContext, useState } from "react";
 import api from "../api/axios";
 
-// =========================
-// 🔐 CREATE CONTEXT
-// =========================
+// Create Auth Context
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  // =========================
-  // 💾 STATE AUTH
-  // =========================
+  // State untuk menyimpan token dan user
   const [token, setToken] = useState(() => {
     return localStorage.getItem("token");
   });
@@ -21,9 +17,7 @@ export const AuthProvider = ({ children }) => {
 
   const isLoggedIn = !!token;
 
-  // =========================
-  // 🔑 LOGIN FUNCTION
-  // =========================
+  // Login Function
   const login = async (data) => {
     try {
       const res = await api.post("/login", data);
@@ -45,9 +39,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // =========================
-  // 🆕 REGISTER FUNCTION (FIX UTAMA)
-  // =========================
+  // Register Function
   const register = async (data) => {
     try {
       const res = await api.post("/register", data);
@@ -64,9 +56,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // =========================
-  // 🚪 LOGOUT FUNCTION
-  // =========================
+  // Logout Function
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -75,16 +65,14 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // =========================
-  // 📦 PROVIDER VALUE
-  // =========================
+  // Provide Value
   return (
     <AuthContext.Provider
       value={{
         token,
         user,
         login,
-        register, // 🔥 WAJIB: agar Register.jsx bisa jalan
+        register,
         logout,
         isLoggedIn,
 
@@ -98,7 +86,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// =========================
-// 🎯 CUSTOM HOOK
-// =========================
+// CUSTOM HOOK
 export const useAuth = () => useContext(AuthContext);
