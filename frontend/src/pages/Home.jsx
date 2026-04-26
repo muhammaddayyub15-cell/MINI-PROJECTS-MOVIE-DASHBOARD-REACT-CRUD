@@ -37,7 +37,15 @@ function Home() {
         <h1 className="text-xl font-bold sm:text-2xl">Movies List</h1>
       </div>
 
-  
+      {/* SEARCH MOBILE */}
+      <input
+        type="text"
+        placeholder="Search movie..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full px-4 py-2 mb-4 text-sm text-white placeholder-gray-400 lg:hidden rounded-xl bg-white/10 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+
       {/* MOVIE GRID */}
       <div className="flex-1">
         {loading ? (
