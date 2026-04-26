@@ -6,26 +6,37 @@ function Genre() {
   const { movies } = useMovie();
   const [selected, setSelected] = useState("All");
 
-  const genres = ["All", "Action", "Drama", "Sci-Fi"];
+  // ambil semua genre unik dari categories JSON
+  const allGenres = ["All", ...new Set(
+    movies.flatMap((m) => {
+      try { return JSON.parse(m.categories || "[]"); }
+      catch { return []; }
+    })
+  )];
 
-  const filtered =
-    selected === "All"
-      ? movies
-      : movies.filter((m) => m.category === selected);
+  const filtered = selected === "All"
+    ? movies
+    : movies.filter((m) => {
+        try {
+          return JSON.parse(m.categories || "[]").includes(selected);
+        } catch { return false; }
+      });
 
   return (
     <div className="text-white">
       <h1 className="mb-4 text-2xl font-bold">🎭 Genre</h1>
 
       {/* FILTER */}
-      <div className="flex gap-2 mb-4">
-        {genres.map((g) => (
+      <div className="flex flex-wrap gap-2 mb-6">
+        {allGenres.map((g) => (
           <button
             key={g}
             onClick={() => setSelected(g)}
-            className={`px-3 py-1 rounded ${
-              selected === g ? "bg-red-600" : "bg-gray-700"
-            }`}
+            className={`px-4 py-1.5 rounded-full text-sm transition-all active:scale-95
+              ${selected === g
+                ? "bg-yellow-500 text-white"
+                : "bg-white/10 text-white/60 hover:bg-white/20"
+              }`}
           >
             {g}
           </button>

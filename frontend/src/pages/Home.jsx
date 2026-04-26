@@ -33,13 +33,6 @@ function Home() {
 
       <h1 className="mb-4 text-2xl font-bold">🎬 INDOFLIX</h1>
 
-      {/* SEARCH (optional) */}
-      <input
-        className="p-2 mb-4 text-black rounded"
-        placeholder="Search movie..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
 
       {/* MOVIE LIST */}
       <MovieList movies={movies} search={search} />

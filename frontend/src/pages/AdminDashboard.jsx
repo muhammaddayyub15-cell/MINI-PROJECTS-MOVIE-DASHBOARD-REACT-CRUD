@@ -78,8 +78,8 @@ function Admin() {
       {/* HEADER */}
       <div className="flex items-center gap-3 pb-4 border-b border-white/10">
         <div>
-          <h1 className="text-2xl font-bold">👑 Admin Dashboard</h1>
-          <p className="text-sm text-white/40">Kelola users dan movies</p>
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+          <p className="text-sm text-white/40">Kelola Users dan Movies</p>
         </div>
       </div>
 

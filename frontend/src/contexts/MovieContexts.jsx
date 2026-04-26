@@ -1,86 +1,68 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import api from "../api/axios";
 
 const MovieContext = createContext();
 
 export const MovieProvider = ({ children }) => {
-  const [movies, setMovies] = useState([
-    { id: 1, title: "Oppenheimer", posterUrl: "...", rating: 8.9, category: "Drama" },
-    { id: 2, title: "Interstellar", posterUrl: "...", rating: 9.1, category: "Sci-Fi" },
-    { id: 3, title: "The Batman", posterUrl: "...", rating: 8.3, category: "Action" },
-  ]);
+  const [movies, setMovies] = useState([]);
+  const [watchlistIds, setWatchlistIds] = useState([]);
 
-  // WATCHLIST
-  const [watchlist, setWatchlist] = useState([]);
-
-  const toggleWatchlist = (movie) => {
-    setWatchlist((prev) => {
-      const exist = prev.find((m) => m.id === movie.id);
-      if (exist) {
-        return prev.filter((m) => m.id !== movie.id); // remove
+  // fetch semua movie
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const res = await api.get("/movies?per_page=100");
+        setMovies(res.data?.data?.data || []);
+      } catch (err) {
+        console.log("MovieContext fetch error:", err);
       }
-      return [...prev, movie]; // add
-    });
+    };
+    fetchAll();
+  }, []);
+
+  // fetch watchlist ids dari API saat load
+  useEffect(() => {
+    const fetchWatchlistIds = async () => {
+      try {
+        const res = await api.get("/watchlist");
+        const ids = (res.data.data || []).map((item) => item.movie_id);
+        setWatchlistIds(ids);
+      } catch (err) {
+        console.log("Watchlist sync error:", err);
+      }
+    };
+    fetchWatchlistIds();
+  }, []);
+
+  const toggleWatchlist = (movieId) => {
+    setWatchlistIds((prev) =>
+      prev.includes(movieId)
+        ? prev.filter((id) => id !== movieId)
+        : [...prev, movieId]
+    );
   };
 
-  const isInWatchlist = (id) => {
-    return watchlist.some((m) => m.id === id);
-  };
+  const isInWatchlist = (movieId) => watchlistIds.includes(movieId);
 
-  // REACTIONS
   const [reactions, setReactions] = useState({});
-  /*
-    structure:
-    {
-      movieId: {
-        love: number,
-        neutral: number,
-        hate: number,
-        user: "love" | "neutral" | "hate"
-      }
-    }
-  */
 
   const reactToMovie = (movieId, type) => {
     setReactions((prev) => {
-      const current = prev[movieId] || {
-        love: 0,
-        neutral: 0,
-        hate: 0,
-        user: null,
-      };
-
+      const current = prev[movieId] || { like: 0, neutral: 0, hate: 0, user: null };
       let updated = { ...current };
-
-      // remove previous reaction
-      if (current.user) {
-        updated[current.user]--;
-      }
-
-      // set new
+      if (current.user) updated[current.user]--;
       updated[type]++;
       updated.user = type;
-
-      return {
-        ...prev,
-        [movieId]: updated,
-      };
+      return { ...prev, [movieId]: updated };
     });
   };
 
   return (
-    <MovieContext.Provider
-      value={{
-        movies,
-        setMovies,
-
-        watchlist,
-        toggleWatchlist,
-        isInWatchlist,
-
-        reactions,
-        reactToMovie,
-      }}
-    >
+    <MovieContext.Provider value={{
+      movies, setMovies,
+      watchlistIds, toggleWatchlist, isInWatchlist,
+      reactions, reactToMovie,
+    }}>
       {children}
     </MovieContext.Provider>
   );
