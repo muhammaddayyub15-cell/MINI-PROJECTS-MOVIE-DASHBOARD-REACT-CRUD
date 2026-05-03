@@ -65,6 +65,11 @@ class MovieController extends Controller
             $data['categories'] = json_encode($data['categories']);
         }
 
+        // Prevent SQL null constraint violation if poster_url is missing
+        if (!isset($data['poster_url']) || is_null($data['poster_url'])) {
+            $data['poster_url'] = "";
+        }
+
         $movie = Movie::create($data);
 
         return response()->json([
@@ -125,6 +130,11 @@ class MovieController extends Controller
         // Ensure JSON format
         if (isset($data['categories']) && is_array($data['categories'])) {
             $data['categories'] = json_encode($data['categories']);
+        }
+
+        // Prevent SQL null constraint violation if poster_url is explicitly set to null
+        if (array_key_exists('poster_url', $data) && is_null($data['poster_url'])) {
+            $data['poster_url'] = "";
         }
 
         $movie->update($data);

@@ -12,7 +12,7 @@ class Movie extends Model
         'poster_url',
         'backdrop_url',
         'rating',
-        'category',
+        'categories',
         'release_year',
         'views',
         'is_trending'

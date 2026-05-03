@@ -13,6 +13,7 @@ import MovieDetail from "./pages/MovieDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import UserDetail from "./pages/UserDetail";
 import UserForm from "./components/ui/admin/UserForm";
+import NotFound from "./pages/NotFound";
 
 
 function App() {
@@ -44,6 +45,9 @@ function App() {
         </Route>
 
       </Route>
+
+      {/* 404 Catch All */}
+      <Route path="*" element={<NotFound />} />
 
     </Routes>
   );

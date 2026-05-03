@@ -1,11 +1,5 @@
 <?php
-// ─────────────────────────────────────────────────────────────────────────────
-// FILE: routes/api.php
-// GANTI SELURUH ISI FILE INI
-// Perubahan: tambah 2 route admin baru:
-//   GET /users/{id}/watchlist  → watchlist milik user tertentu
-//   GET /users/{id}/reactions  → reactions milik user tertentu
-// ─────────────────────────────────────────────────────────────────────────────
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
