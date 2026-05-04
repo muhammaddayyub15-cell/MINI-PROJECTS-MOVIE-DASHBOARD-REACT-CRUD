@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 import { useMovie } from "../contexts/MovieContexts";
 
@@ -6,6 +7,16 @@ function Watchlist() {
   const { toggleWatchlist } = useMovie();
   const [apiWatchlist, setApiWatchlist] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("search") || "";
+
+  // Filter client-side berdasarkan keyword search dari Navbar
+  const filtered = search
+    ? apiWatchlist.filter((item) =>
+        item.movie?.title?.toLowerCase().includes(search.toLowerCase())
+      )
+    : apiWatchlist;
 
   const fetchWatchlist = async () => {
     setLoading(true);
@@ -34,19 +45,20 @@ function Watchlist() {
   return (
     <div className="text-white">
       <h1 className="mb-4 text-2xl font-bold">
-         Watchlist ({apiWatchlist.length})
+         Watchlist ({filtered.length})
+         {search && <span className="ml-2 text-base font-normal text-white/40">· search: "{search}"</span>}
       </h1>
 
       {loading ? (
         <p className="text-white/40">Loading...</p>
-      ) : apiWatchlist.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="py-16 text-center text-white/30">
           <p className="mb-3 text-4xl">☆</p>
-          <p>You haven't added any movies to your watchlist yet.</p>
+          <p>{search ? `No results for "${search}" in your watchlist.` : "You haven't added any movies to your watchlist yet."}</p>
         </div>
       ) : (
         <div className="grid gap-3">
-          {apiWatchlist.map((item) => (
+          {filtered.map((item) => (
             <div
               key={item.id}
               className="flex items-center justify-between p-4 transition-all border rounded-xl bg-white/5 border-white/10 hover:bg-white/10"

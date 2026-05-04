@@ -5,7 +5,7 @@ import { useMovie } from "../../../contexts/MovieContexts";
 
 const PLACEHOLDER = "https://placehold.co/300x450/1a1a1a/ffffff?text=No+Image";
 
-function MovieCard({ id, title, poster_url, rating, categories }) {
+function MovieCard({ id, title, poster_url, rating, categories, onBrokenPoster }) {
   const navigate = useNavigate();
   const { toggleWatchlist, isInWatchlist } = useMovie();
 
@@ -169,7 +169,10 @@ function MovieCard({ id, title, poster_url, rating, categories }) {
             alt={title}
             className={`w-full h-full object-cover transition-all duration-300
               ${expanded ? "brightness-75" : "brightness-100"}`}
-            onError={(e) => { e.target.src = PLACEHOLDER; }}
+            onError={(e) => {
+              e.target.src = PLACEHOLDER;
+              if (onBrokenPoster) onBrokenPoster(id);
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 

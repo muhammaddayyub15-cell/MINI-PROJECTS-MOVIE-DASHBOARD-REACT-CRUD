@@ -59,6 +59,9 @@ function Admin() {
   const [loadingMovies, setLoadingMovies]   = useState(true);
   const [showMovieModal, setShowMovieModal] = useState(false);
   const [editMovie, setEditMovie]           = useState(null);
+  const [moviePage, setMoviePage]           = useState(1);
+  const [movieLastPage, setMovieLastPage]   = useState(1);
+  const [movieTotal, setMovieTotal]         = useState(0);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchUsers = async () => {
@@ -73,16 +76,20 @@ function Admin() {
     finally { setLoadingUsers(false); }
   };
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (p = moviePage) => {
     setLoadingMovies(true);
     try {
-      const res = await api.get(`/movies`);
-      setMovies(res.data.data.data);
+      const res = await api.get(`/movies?page=${p}&per_page=10`);
+      const result = res.data.data;
+      setMovies(result.data);
+      setMovieLastPage(result.last_page);
+      setMovieTotal(result.total);
     } catch (err) { console.log(err); }
     finally { setLoadingMovies(false); }
   };
 
-  useEffect(() => { fetchUsers(); fetchMovies(); }, [page]);
+  useEffect(() => { fetchUsers(); }, [page]);
+  useEffect(() => { fetchMovies(moviePage); }, [moviePage]);
 
   // ── Handlers 
   const handleDeleteUser = async (id) => {
@@ -106,14 +113,19 @@ function Admin() {
   const handleDeleteMovie = async (id) => {
     if (!confirm("Hapus movie ini?")) return;
     await api.delete(`/movies/${id}`);
-    fetchMovies();
+    fetchMovies(moviePage);
   };
 
   const handleMovieSubmit = async (data) => {
-    if (editMovie) await api.put(`/movies/${editMovie.id}`, data);
-    else           await api.post(`/movies`, data);
-    setShowMovieModal(false);
-    fetchMovies();
+    try {
+      if (editMovie) await api.put(`/movies/${editMovie.id}`, data);
+      else           await api.post(`/movies`, data);
+      setShowMovieModal(false);
+      setMoviePage(1);         // go back to page 1 to see newly created movie
+      fetchMovies(1);
+    } catch (err) {
+      console.log("Movie submit error:", err.response?.data);
+    }
   };
 
   const handleToggleStatus = async (user) => {
@@ -153,7 +165,7 @@ function Admin() {
         </div>
         <div className="p-4 border sm:p-5 rounded-xl bg-white/5 border-white/10">
           <p className="text-xs sm:text-sm text-white/40">Total Movies</p>
-          <p className="mt-1 text-2xl font-bold sm:text-3xl">{movies.length}</p>
+          <p className="mt-1 text-2xl font-bold sm:text-3xl">{movieTotal}</p>
         </div>
       </div>
 
@@ -262,7 +274,7 @@ function Admin() {
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-base font-semibold sm:text-lg">
             Movies
-            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-white/10 text-white/50">{movies.length}</span>
+            <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-white/10 text-white/50">{movieTotal}</span>
           </h2>
           <button
             onClick={() => { setEditMovie(null); setShowMovieModal(true); }}
@@ -296,7 +308,14 @@ function Admin() {
                   </tr>
                 ) : movies.map((m) => (
                   <tr key={m.id} className="transition-colors border-t border-white/5 hover:bg-white/5 group">
-                    <td className="px-4 py-3 font-medium transition-colors whitespace-nowrap group-hover:text-white">{m.title}</td>
+                    <td className="px-4 py-3 font-medium transition-colors whitespace-nowrap group-hover:text-white">
+                      <div className="flex items-center gap-2">
+                        {(!m.poster_url || m.poster_url.trim() === "") && (
+                          <span className="px-1.5 py-0.5 text-[10px] rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">No Poster</span>
+                        )}
+                        {m.title}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-yellow-400 whitespace-nowrap">★ {m.rating}</td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1 min-w-[120px]">
@@ -321,6 +340,22 @@ function Admin() {
             </table>
           </div>
         </div>
+
+        {/* Movie Pagination */}
+        {movieLastPage > 1 && (
+          <div className="flex items-center justify-between px-4 py-3 mt-2 border border-white/10 rounded-xl bg-white/5">
+            <button
+              onClick={() => setMoviePage(p => p - 1)} disabled={moviePage === 1}
+              className="px-3 py-1 text-xs transition-all rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+            >← Prev</button>
+            <span className="text-xs text-white/40">Page {moviePage} / {movieLastPage}</span>
+            <button
+              onClick={() => setMoviePage(p => p + 1)} disabled={moviePage === movieLastPage}
+              className="px-3 py-1 text-xs transition-all rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+            >Next →</button>
+          </div>
+        )}
+
       </div>
 
       {/* ── USER QUICK MODAL ── */}

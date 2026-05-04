@@ -28,7 +28,10 @@ class MovieController extends Controller
             $query->where('rating', '>=', 8);
         }
 
-        // Sort By Rating
+        // PRIMARY sort: movies with valid posters come first (across all pages)
+        $query->orderByRaw("CASE WHEN poster_url IS NULL OR poster_url = '' THEN 1 ELSE 0 END ASC");
+
+        // SECONDARY sort: within each group, apply the user's chosen order
         if ($request->sort === 'rating') {
             $query->orderBy('rating', 'desc');
         } else {

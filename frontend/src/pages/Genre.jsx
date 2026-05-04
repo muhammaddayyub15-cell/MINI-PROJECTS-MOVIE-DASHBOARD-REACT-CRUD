@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 import MovieList from "../components/ui/movie/MovieList";
 
@@ -16,6 +17,9 @@ function Genre() {
   const [lastPage, setLastPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("search") || "";
+
   const perPage = 24;
 
   // FETCH MOVIES FROM API (WITH GENRE FILTER)
@@ -24,7 +28,7 @@ function Genre() {
 
     try {
       const res = await api.get(
-        `/movies?page=${currentPage}&per_page=${perPage}&genre=${genre}`
+        `/movies?page=${currentPage}&per_page=${perPage}&genre=${genre}${search ? `&search=${search}` : ""}`
       );
 
       const data = res.data?.data;
@@ -47,12 +51,12 @@ function Genre() {
   // INITIAL LOAD
   useEffect(() => {
     fetchMovies(page, selected);
-  }, [page, selected]);
+  }, [page, selected, search]);
 
-  // RESET PAGE saat genre berubah
+  // RESET PAGE saat genre atau search berubah
   useEffect(() => {
     setPage(1);
-  }, [selected]);
+  }, [selected, search]);
 
   return (
     <div className="text-white">

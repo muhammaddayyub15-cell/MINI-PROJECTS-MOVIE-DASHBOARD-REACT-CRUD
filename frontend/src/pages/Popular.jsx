@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 import MovieList from "../components/ui/movie/MovieList";
 
 function Popular() {
-  const outlet = useOutletContext() || {};
-  const search = outlet.search || "";
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("search") || "";
 
   const [movies, setMovies] = useState([]);
   const [page, setPage] = useState(1);
@@ -60,25 +60,23 @@ function Popular() {
         <MovieList movies={movies} />
       )}
 
-      {lastPage > 1 && (
-        <div className="flex justify-center gap-3 mt-8">
-
+      {!loading && lastPage > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-8">
           <button
             onClick={() => setPage((p) => Math.max(p - 1, 1))}
             disabled={page === 1}
+            className="px-4 py-2 text-sm transition-all border rounded-lg bg-white/10 border-white/20 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
           >
-            Prev
+            ← Prev
           </button>
-
-          <span>{page} / {lastPage}</span>
-
+          <span className="px-3 py-1 text-sm rounded-lg bg-white/10">{page} / {lastPage}</span>
           <button
             onClick={() => setPage((p) => Math.min(p + 1, lastPage))}
             disabled={page === lastPage}
+            className="px-4 py-2 text-sm transition-all border rounded-lg bg-white/10 border-white/20 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
           >
-            Next
+            Next →
           </button>
-
         </div>
       )}
     </div>

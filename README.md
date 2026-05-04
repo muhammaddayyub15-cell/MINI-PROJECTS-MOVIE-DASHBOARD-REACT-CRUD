@@ -2,7 +2,7 @@ Project Dokumentasi ID
 
 # 🎬 INDOFLIX — Movie Dashboard React CRUD
 
-> Mini Project React.js dengan fitur autentikasi, manajemen user & movie, watchlist, reactions, dan admin dashboard.
+> Mini Project React.js + Laravel dengan fitur autentikasi, manajemen user & movie, watchlist, reactions, dan admin dashboard. Dibangun dengan desain **Glassmorphism** premium.
 
 ---
 
@@ -22,7 +22,7 @@ Project Dokumentasi ID
 ## Fitur Utama (Requirement)
 
 ### 🔐 Autentikasi
-- **Register** — form registrasi user baru dengan validasi
+- **Register** — form registrasi user baru, token langsung dikembalikan setelah daftar
 - **Login** — autentikasi dengan token (Laravel Sanctum)
 - **Logout** — hapus token dari storage
 - **Protected Routes** — halaman tertentu hanya bisa diakses user yang sudah login
@@ -33,19 +33,22 @@ Project Dokumentasi ID
 - **Detail User** — halaman detail per user (`/admin/users/:id`)
 - **Edit User** — form edit data user (nama, email, password, role)
 - **Hapus User** — konfirmasi sebelum delete
-- **Toggle Status** — aktifkan / nonaktifkan user langsung dari tabel tanpa reload
+- **Toggle Status** — aktifkan / nonaktifkan (suspend) user langsung dari tabel tanpa reload
 
 ### 🎬 Movie Features
 - **Daftar Film** — grid responsive dengan pagination (24 per halaman)
-- **Search Film** — search real-time via API (desktop: Navbar, mobile: input di halaman)
+- **Search Film** — search real-time via API (Navbar desktop; semua halaman: Home, Popular, Genre, Watchlist)
+- **Search via URL Params** — keyword search tersimpan di URL (`?search=...`), mendukung bookmark & share
 - **Detail Film** — pop-up hover card dengan deskripsi, rating, views, reaksi
 - **Watchlist** — simpan film ke watchlist personal
 - **Reactions** — berikan reaksi Love / Neutral / Hate pada film
+- **Smart Poster Sorting** — film tanpa poster (URL kosong atau 404) otomatis dipindah ke halaman terakhir
 
 ### 🛠️ Admin Dashboard
 - **Kelola User** — CRUD lengkap dengan quick modal
-- **Kelola Movie** — CRUD film (tambah, edit, hapus)
-- **Statistik** — total user dan total film
+- **Kelola Movie** — CRUD film (tambah, edit, hapus) dengan pagination tabel (10 per halaman)
+- **Badge "No Poster"** — indikator oranye pada film yang belum memiliki poster
+- **Statistik** — total user dan total film dari API
 
 ### 📱 Responsive Design
 - **Desktop** — sidebar permanen, search di Navbar
@@ -65,10 +68,9 @@ Project Dokumentasi ID
 | **Quick Modal User** | Klik baris user di tabel memunculkan modal detail dengan aksi Edit, Delete, dan View Detail |
 | **Skeleton Loading** | Placeholder animasi saat data sedang dimuat |
 | **Glassmorphism UI** | Desain modern dengan efek blur, transparan, dan gradient |
-| **Search via URL Params** | Keyword search tersimpan di URL (`?search=...`), mendukung bookmark & share |
-| **Pagination dengan Page Numbers** | Navigasi halaman dengan nomor + ellipsis |
-| **Trending Badge** | Film dengan `is_trending=1` mendapat badge  |
-| **Poster Fallback** | Otomatis tampilkan placeholder jika gambar poster gagal dimuat |
+| **Poster Auto-Sort** | Film tanpa poster (URL kosong atau gambar 404) otomatis dipindah ke halaman akhir |
+| **Trending Badge** | Film dengan `is_trending=1` mendapat badge khusus |
+| **404 Not Found Page** | Halaman estetik dengan tombol kembali cerdas (ke Home jika login, ke Landing jika tidak) |
 
 ---
 
@@ -78,7 +80,7 @@ Project Dokumentasi ID
 frontend/
 ├── src/
 │   ├── api/
-│   │   └── axios.js              # Axios instance + interceptor token
+│   │   └── axios.jsx             # Axios instance + interceptor token
 │   ├── components/
 │   │   ├── layout/
 │   │   │   └── MainLayout.jsx    # Layout utama (sidebar + navbar + outlet)
@@ -99,6 +101,7 @@ frontend/
 │   │   ├── AuthContexts.jsx      # Global auth state (token, user, login, logout)
 │   │   └── MovieContexts.jsx     # Global watchlist state
 │   ├── pages/
+│   │   ├── Landing.jsx           # Halaman publik utama
 │   │   ├── Home.jsx
 │   │   ├── Login.jsx
 │   │   ├── Register.jsx
@@ -108,7 +111,8 @@ frontend/
 │   │   ├── Watchlist.jsx
 │   │   ├── Popular.jsx
 │   │   ├── Genre.jsx
-│   │   └── ComingSoon.jsx
+│   │   ├── ComingSoon.jsx
+│   │   └── NotFound.jsx          # Halaman 404 dengan redirect cerdas
 │   └── route/
 │       └── ProtectedRoute.jsx
 
@@ -137,8 +141,10 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --seed
-php artisan serve
+php artisan serve --port=8001
 ```
+
+> Admin Default: `admin@mail.com` | Password: `password`
 
 ### Frontend (React + Vite)
 ```bash
@@ -147,7 +153,7 @@ npm install
 npm run dev
 ```
 
-> Pastikan backend berjalan di `http://localhost:8000` dan frontend di `http://localhost:5173`
+> Pastikan backend berjalan di `http://localhost:8001` dan frontend di `http://localhost:5173`
 
 ---
 
@@ -155,20 +161,22 @@ npm run dev
 
 | Method | Endpoint | Auth | Deskripsi |
 |---|---|---|---|
-| POST | `/api/register` | ❌ | Register user baru |
+| POST | `/api/register` | ❌ | Register user baru + dapat token |
 | POST | `/api/login` | ❌ | Login & dapat token |
 | POST | `/api/logout` | ✅ | Logout |
+| GET | `/api/me` | ✅ | Info user yang sedang login |
 | GET | `/api/users` | ✅ Admin | List semua user |
 | GET | `/api/users/:id` | ✅ Admin | Detail user |
-| PUT | `/api/users/:id` | ✅ Admin | Update user |
+| PUT | `/api/users/:id` | ✅ Admin | Update user / toggle suspend |
 | DELETE | `/api/users/:id` | ✅ Admin | Hapus user |
-| GET | `/api/movies` | ✅ | List film + search + pagination |
+| GET | `/api/movies` | ❌ | List film + search + filter genre + pagination |
 | GET | `/api/movies/:id` | ✅ | Detail film + reaction count |
 | POST | `/api/movies` | ✅ Admin | Tambah film |
 | PUT | `/api/movies/:id` | ✅ Admin | Edit film |
 | DELETE | `/api/movies/:id` | ✅ Admin | Hapus film |
+| GET | `/api/watchlist` | ✅ | Daftar watchlist user |
 | POST | `/api/watchlist/:id` | ✅ | Toggle watchlist |
-| POST | `/api/reactions/:id` | ✅ | Tambah reaksi film |
+| POST | `/api/reactions/:id` | ✅ | Tambah / ubah reaksi film |
 
 ---
 
