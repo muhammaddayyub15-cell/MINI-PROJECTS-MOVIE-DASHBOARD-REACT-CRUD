@@ -19,7 +19,7 @@ function Login() {
       // Fix Navigate Ke Home Setelah Login
       navigate("/home");
     } else {
-      setError(res.message || "Login gagal");
+      setError(res.message || "Login Failed");
     }
   };
 
@@ -88,7 +88,7 @@ function Login() {
               disabled={loading}
               className="w-full py-3 mt-2 font-bold text-white transition-all border rounded-xl bg-white/10 border-white/20 hover:bg-white/20 active:scale-95 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Masuk..." : "Login"}
+              {loading ? "Loading..." : "Login"}
             </button>
 
           </form>
@@ -104,7 +104,7 @@ function Login() {
 
         {/* Demo account hint */}
         <div className="p-3 mt-4 text-center border rounded-xl border-white/5 bg-white/3">
-          <p className="text-xs text-white/30">Demo: <span className="text-white/50">admin@mail.com</span> / <span className="text-white/50">password</span></p>
+          <p className="text-xs text-white/30">Demo: <span className="text-white/50">admin@mail.com</span> / <span className="text-white/50">password in Readme.md</span></p>
         </div>
 
       </div>
