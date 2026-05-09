@@ -1,11 +1,23 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 import MovieList from "../components/ui/movie/MovieList";
 
 function Popular() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
+
+  const [mobileSearch, setMobileSearch] = useState(search);
+  const mobileDebounce = useRef(null);
+
+  const handleMobileSearch = (val) => {
+    setMobileSearch(val);
+    clearTimeout(mobileDebounce.current);
+    mobileDebounce.current = setTimeout(() => {
+      if (val) setSearchParams({ search: val });
+      else setSearchParams({});
+    }, 500);
+  };
 
   const [movies, setMovies] = useState([]);
   const [page, setPage] = useState(1);
@@ -53,6 +65,15 @@ function Popular() {
   return (
     <div className="text-white">
       <h1 className="mb-4 text-2xl font-bold">Popular Movies</h1>
+
+      {/* SEARCH mobile & tablet */}
+      <input
+        type="text"
+        placeholder="Search popular..."
+        value={mobileSearch}
+        onChange={(e) => handleMobileSearch(e.target.value)}
+        className="w-full px-4 py-2 mb-4 text-sm text-white placeholder-gray-400 rounded-xl bg-white/10 focus:outline-none focus:ring-2 focus:ring-yellow-400 lg:hidden"
+      />
 
       {loading ? (
         <div className="text-white/40">Loading...</div>

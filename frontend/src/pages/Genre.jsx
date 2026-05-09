@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 import MovieList from "../components/ui/movie/MovieList";
@@ -16,9 +16,19 @@ function Genre() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [loading, setLoading] = useState(true);
-
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
+  const [mobileSearch, setMobileSearch] = useState(search);
+  const mobileDebounce = useRef(null);
+
+  const handleMobileSearch = (val) => {
+    setMobileSearch(val);
+    clearTimeout(mobileDebounce.current);
+    mobileDebounce.current = setTimeout(() => {
+      if (val) setSearchParams({ search: val });
+      else setSearchParams({});
+    }, 500);
+  };
 
   const perPage = 24;
 
@@ -64,6 +74,15 @@ function Genre() {
       {/* HEADER */}
       <h1 className="mb-4 text-2xl font-bold">Genre</h1>
 
+      {/* SEARCH mobile & tablet */}
+      <input
+        type="text"
+        placeholder="Search genre..."
+        value={mobileSearch}
+        onChange={(e) => handleMobileSearch(e.target.value)}
+        className="w-full px-4 py-2 mb-4 text-sm text-white placeholder-gray-400 rounded-xl bg-white/10 focus:outline-none focus:ring-2 focus:ring-yellow-400 lg:hidden"
+      />
+
       {/* FILTER TABS */}
       <div className="flex flex-wrap gap-2 mb-6">
         {genres.map((g) => (
@@ -71,10 +90,9 @@ function Genre() {
             key={g}
             onClick={() => setSelected(g)}
             className={`px-4 py-1.5 rounded-full text-sm transition-all active:scale-95
-              ${
-                selected === g
-                  ? "bg-yellow-500 text-black font-semibold"
-                  : "bg-white/10 text-white/60 hover:bg-white/20"
+              ${selected === g
+                ? "bg-yellow-500 text-black font-semibold"
+                : "bg-white/10 text-white/60 hover:bg-white/20"
               }`}
           >
             {g}

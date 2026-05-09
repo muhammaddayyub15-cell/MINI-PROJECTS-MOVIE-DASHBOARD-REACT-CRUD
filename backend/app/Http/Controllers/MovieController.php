@@ -85,13 +85,16 @@ class MovieController extends Controller
     // Detail Movie + Reactions Count
     public function show($id)
     {
-        $movie = Movie::withCount([
+        $movie = Movie::with('trailers')->withCount([
             'watchlists as watchlist_count',
             'reactions as love_count' => function ($q) {
                 $q->where('type', 'love');
             },
             'reactions as hate_count' => function ($q) {
                 $q->where('type', 'hate');
+            },
+            'reactions as neutral_count' => function ($q) {
+                $q->where('type', 'neutral');
             }
         ])->find($id);
 
@@ -102,6 +105,17 @@ class MovieController extends Controller
                 'available_ids' => Movie::pluck('id')
             ], 404);
         }
+
+        $userReaction = null;
+        if (auth('sanctum')->check()) {
+            $reaction = \App\Models\Reaction::where('movie_id', $id)
+                ->where('user_id', auth('sanctum')->id())
+                ->first();
+            if ($reaction) {
+                $userReaction = $reaction->type;
+            }
+        }
+        $movie->user_reaction = $userReaction;
 
         return response()->json([
             'success' => true,

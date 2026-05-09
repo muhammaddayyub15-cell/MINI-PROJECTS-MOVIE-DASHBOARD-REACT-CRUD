@@ -31,6 +31,12 @@ class Movie extends Model
         return $this->hasMany(Reaction::class);
     }
 
+    // Trailers Relation (One-to-Many)
+    public function trailers()
+    {
+        return $this->hasMany(Trailer::class);
+    }
+
     // Popular Scope (rating >= 8)
     public function scopePopular($query)
     {

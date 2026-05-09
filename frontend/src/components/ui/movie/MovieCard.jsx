@@ -15,7 +15,7 @@ function MovieCard({ id, title, poster_url, rating, categories, onBrokenPoster }
   const [loading, setLoading]             = useState(false);
   const [reaction, setReaction]           = useState(null);
   const [showReactions, setShowReactions] = useState(false);
-  const [counts, setCounts]               = useState({ love: 0, hate: 0, watchlist: 0 });
+  const [counts, setCounts]               = useState({ love: 0, hate: 0, neutral: 0, watchlist: 0 });
   const cardRef     = useRef(null);
   const reactionRef = useRef(null);
   const hoverTimer  = useRef(null);
@@ -46,6 +46,7 @@ function MovieCard({ id, title, poster_url, rating, categories, onBrokenPoster }
           neutral:   d.neutral_count   ?? 0,
           watchlist: d.watchlist_count ?? 0,
         });
+        setReaction(d.user_reaction || null);
       } catch (err) {
         console.log("Fetch detail error:", err);
       } finally {
@@ -112,8 +113,10 @@ function MovieCard({ id, title, poster_url, rating, categories, onBrokenPoster }
         const next = { ...prev };
         if (reaction === "love") next.love = Math.max(0, next.love - 1);
         if (reaction === "hate") next.hate = Math.max(0, next.hate - 1);
+        if (reaction === "neutral") next.neutral = Math.max(0, next.neutral - 1);
         if (type === "love") next.love += 1;
         if (type === "hate") next.hate += 1;
+        if (type === "neutral") next.neutral += 1;
         return next;
       });
       setReaction(type);
@@ -250,9 +253,10 @@ function MovieCard({ id, title, poster_url, rating, categories, onBrokenPoster }
                 )}
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-1 mb-2.5">
+                <div className="grid grid-cols-4 gap-1 mb-2.5">
                   {[
                     { emoji: "👍", count: counts.love,      label: "Love" },
+                    { emoji: "😐", count: counts.neutral,   label: "Neutral" },
                     { emoji: "👎", count: counts.hate,      label: "Hate" },
                     { emoji: "★",  count: counts.watchlist, label: "Saved" },
                   ].map(({ emoji, count, label }) => (
