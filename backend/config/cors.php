@@ -15,7 +15,9 @@ return [
         'https://movie-dashboard-git-main-muhammaddayyub15-cells-projects.vercel.app',
     ],
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '/^https:\/\/movie-dashboard-.*\.vercel\.app$/',
+    ],
 
     'allowed_headers' => ['*'],
 
