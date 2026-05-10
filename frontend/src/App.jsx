@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserDetail from "./pages/UserDetail";
 import UserForm from "./components/ui/admin/UserForm";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
 
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="/watchlist" element={<Watchlist />} />
           <Route path="/movies/:id" element={<MovieDetail />} />
           <Route path="/coming-soon" element={<ComingSoon />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         // Admin Only

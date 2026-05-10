@@ -47,4 +47,17 @@ class ReactionController extends Controller
             ]
         ]);
     }
+
+    public function myReactions()
+    {
+        $reactions = Reaction::with('movie')
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $reactions
+        ]);
+    }
 }

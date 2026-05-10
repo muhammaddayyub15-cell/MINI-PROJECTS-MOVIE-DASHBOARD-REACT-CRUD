@@ -140,13 +140,30 @@ class UserController extends Controller
         $user = $request->user();
 
         $request->validate([
-            'name'  => 'sometimes|string',
-            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'name'     => 'sometimes|string',
+            'email'    => 'sometimes|email|unique:users,email,' . $user->id,
+            'password' => 'sometimes|nullable|min:6',
         ]);
 
-        $user->update($request->only(['name', 'email']));
+        $data = $request->only(['name', 'email']);
+
+        if ($request->filled('password')) {
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        $user->update($data);
 
         return response()->json(['success' => true, 'message' => 'Profile updated', 'data' => $user]);
+    }
+
+    // User: Suspend Own Account
+    public function suspendSelf(Request $request)
+    {
+        $user = $request->user();
+        $user->update(['is_active' => false]);
+        $user->tokens()->delete();
+        
+        return response()->json(['success' => true, 'message' => 'Account suspended']);
     }
 
     // User: Delete Own Account

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useMovie } from "../contexts/MovieContexts";
 
 function Watchlist() {
+  const navigate = useNavigate();
   const { toggleWatchlist } = useMovie();
   const [apiWatchlist, setApiWatchlist] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +62,8 @@ function Watchlist() {
           {filtered.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between p-4 transition-all border rounded-xl bg-white/5 border-white/10 hover:bg-white/10"
+              onClick={() => navigate(`/movies/${item.movie_id}`)}
+              className="flex items-center justify-between p-4 transition-all border cursor-pointer rounded-xl bg-white/5 border-white/10 hover:bg-white/10"
             >
               <div className="flex items-center gap-3">
                 <img
@@ -76,7 +78,10 @@ function Watchlist() {
                 </div>
               </div>
               <button
-                onClick={() => handleRemove(item.movie_id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(item.movie_id);
+                }}
                 className="px-3 py-1.5 text-sm rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 active:scale-95 transition-all"
               >
                 Remove

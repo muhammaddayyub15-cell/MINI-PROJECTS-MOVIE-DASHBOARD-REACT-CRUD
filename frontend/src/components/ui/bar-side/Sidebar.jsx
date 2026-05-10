@@ -12,7 +12,7 @@ const menu = [
   { label: "Genres", path: "/genre" },
   { label: "Watchlist", path: "/watchlist" },
   { label: "Community Talks", path: "/coming-soon" },
-  { label: "Profile", path: "/coming-soon" },
+  { label: "Profile", path: "/profile" },
   { label: "Admin Dashboard", path: "/admin", adminOnly: true },
 ];
 

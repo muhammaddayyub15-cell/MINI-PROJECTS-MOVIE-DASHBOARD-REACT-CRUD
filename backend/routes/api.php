@@ -32,9 +32,11 @@ Route::get('/movies/{id}',  [MovieController::class, 'show']);
     // Reaction Routes
     Route::post('/reactions/{movieId}',   [ReactionController::class, 'react']);
     Route::get('/reactions/{movieId}',    [ReactionController::class, 'summary']);
+    Route::get('/my-reactions',           [ReactionController::class, 'myReactions']);
 
     // User Self-Management
     Route::put('/me',    [UserController::class, 'updateSelf']);
+    Route::put('/me/suspend', [UserController::class, 'suspendSelf']);
     Route::delete('/me', [UserController::class, 'deleteSelf']);
 
     // Report broken poster — any logged-in user can trigger this
