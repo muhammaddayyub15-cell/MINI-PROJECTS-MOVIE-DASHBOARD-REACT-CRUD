@@ -12,7 +12,7 @@ return [
 
     'allowed_origins' => [
         'http://localhost:5173',
-        'https://movie-dashboard-git-main-muhammaddayyub15-cells-projects.vercel.app/',
+        'https://movie-dashboard-git-main-muhammaddayyub15-cells-projects.vercel.app',
     ],
 
     'allowed_origins_patterns' => [],
